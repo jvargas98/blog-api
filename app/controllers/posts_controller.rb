@@ -1,4 +1,15 @@
 class PostsController < ApplicationController
+  before_action :set_post, only: [:show, :update]
+
+  rescue_from Exception do |e|
+    log.error "#{e.message}"
+    render json: { error: e.message }, status: :internal_error
+  end
+
+  rescue_from ActiveRecord::RecordInvalid do |e|
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   #GET /posts
   def index
     @posts = Post.where(published: true)
@@ -7,7 +18,32 @@ class PostsController < ApplicationController
 
   #GET /post/{id}
   def show
-    @post = Post.find(params[:id])
     render json: @post, status: :ok
+  end
+
+  # POST /posts
+  def create
+    @post = Post.create!(create_params)
+    render json: @post, status: :created
+  end
+
+  # PUT /posts/{id}
+  def update
+    @post.update!(update_params)
+    render json: @post, status: :ok
+  end
+
+  private
+
+  def set_post
+    @post = Post.find(params[:id])
+  end
+
+  def create_params
+    params.require(:post).permit(:title, :content, :published, :user_id)
+  end
+
+  def update_params
+    params.require(:post).permit(:title, :content, :published)
   end
 end
