@@ -22,19 +22,25 @@ class PostsController < ApplicationController
 
   #GET /post/{id}
   def show
-    render json: @post, status: :ok
+    if (@post.published? || (Current.user && @post.user_id == Current.user.id))
+      render json: @post, status: :ok
+    else
+      render json: { error: "Not Found" }, status: :not_found
+    end
   end
 
   # POST /posts
   def create
-    @post = Post.create!(create_params)
+    @post = Current.user.posts.create!(post_params)
     render json: @post, status: :created
   end
 
   # PUT /posts/{id}
   def update
-    @post.update!(update_params)
-    render json: @post, status: :ok
+    if Current.user.posts.find(params[:id])
+      @post.update!(post_params)
+      render json: @post, status: :ok
+    end
   end
 
   private
@@ -43,11 +49,7 @@ class PostsController < ApplicationController
     @post = Post.find(params[:id])
   end
 
-  def create_params
-    params.require(:post).permit(:title, :content, :published, :user_id)
-  end
-
-  def update_params
+  def post_params
     params.require(:post).permit(:title, :content, :published)
   end
 

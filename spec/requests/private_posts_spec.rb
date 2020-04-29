@@ -16,7 +16,7 @@ RSpec.describe "Posts with authentication", type: :request do
           before { get "/posts/#{other_user_post.id}", headers: auth_headers }
 
           context "payload" do
-            subject { payload = JSON.parse(response.body) }
+            subject { payload }
             it { is_expected.to include(:id) }
           end
 
@@ -30,10 +30,9 @@ RSpec.describe "Posts with authentication", type: :request do
           before { get "/posts/#{other_user_post_draft.id}", headers: auth_headers }
 
           context "payload" do
-            subject { payload = JSON.parse(response.body) }
+            subject { payload }
             it { is_expected.to include(:error) }
           end
-
           context "response" do
             subject { response }
             it { is_expected.to have_http_status(:not_found) }
@@ -50,5 +49,11 @@ RSpec.describe "Posts with authentication", type: :request do
   end
 
   describe "PUT /posts/{id}" do
+  end
+
+  private
+
+  def payload
+    payload = JSON.parse(response.body).with_indifferent_access
   end
 end
