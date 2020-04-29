@@ -36,7 +36,7 @@ RSpec.describe "Posts", type: :request do
     end
   end
 
-  describe "GET /post/{id}" do
+  describe "GET /posts/{id}" do
     let!(:post) { create(:post) }
 
     it "should return all the published posts" do
